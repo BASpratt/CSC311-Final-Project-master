@@ -58,6 +58,11 @@ public interface Constants
 	/** describes if client should connect or listen */
 	public final int INTENT_LISTEN_FOR = 1;
 
+    public static final int PAINT_COLOR = 0xff666666; // grey
+    public static final int ARTILLERY_WIDTH_FRAC = 25;
+    public static final int ARTILLERY_HEIGHT_FRAC = 50;
+    public static final int ARTILLERY_SPACE_FRAC = 50;
+
 	/** Bluetooth connection status CONNECTED */
 	public final int CONNECTED = 0;
 	/** Bluetooth connection status DISCONNECTED */
