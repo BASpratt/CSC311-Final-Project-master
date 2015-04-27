@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">CSC311-FInal-Project</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_login2">Log in</string>
+    <string name="Empty_message">No Messages for you\n\n</string>
+    <string name="title_activity_battle">BattleActivity</string>
+</resources>
