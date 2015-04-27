@@ -13,6 +13,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * Edited by B. Spratt 4/27/2015
  */
 
 package pw.dedominic.csc311_final_project;
@@ -35,11 +37,8 @@ public class BattleView extends View
 {
     private final Random random = new Random();
 
-    private Handler mHandler;
-
     private boolean isGameRunning = false;
     private boolean isStateController = false;
-    private boolean click = false;
 
     // game pieces
     private Artillery artillery_enemy;
@@ -105,20 +104,14 @@ public class BattleView extends View
     {
         float max = getHeight() / 2;
         float min = getHeight() / 4;
-        return (float) ((random.nextInt((int)(max - min) + 1) + min));
+        return ((random.nextInt((int)(max - min) + 1) + min));
     }
 
     public float newBuildingWidth()
     {
         float min = getWidth() / 14;
         float max = getWidth() / 10;
-        return (float) ((random.nextInt((int)(max - min) + 1) + min));
-    }
-
-    public void setConstants(Handler wHandler, boolean stateController)
-    {
-        mHandler = wHandler;
-        isStateController = stateController;
+        return ((random.nextInt((int)(max - min) + 1) + min));
     }
 
     private void setLayoutConstants()
@@ -130,38 +123,36 @@ public class BattleView extends View
 
     private void checkMissileCollision()
     {
-        if (mMissile.getLeft() <= 0 || mMissile.getRight() >= getWidth() ||
-                mMissile.getTop() <= 0 || mMissile.getBottom() >= getHeight())
+        if (mMissile.y >= mBuilding.getTop() &&
+                mMissile.y <= mBuilding.getBottom() &&
+                mMissile.x >= mBuilding.getLeft() &&
+                mMissile.x <= mBuilding.getRight())
         {
-            //delete missile
+            mMissile.setDeleteMissile(true);
         }
 
-        if (mMissile.y >= artillery_enemy.getTop())
+        if (mMissile.getX_vel()<0)
         {
-            newGame();
+            if (mMissile.getY() >= artillery_player.getTop() &&
+                    mMissile.getY() <= artillery_player.getBottom() &&
+                    mMissile.getX() <= artillery_player.getRight() &&
+                    mMissile.getX() >= artillery_player.getLeft())
+            {
+                mMissile.setDeleteMissile(true);
+                gameOver();
+            }
         }
-
-        //if (ball.getX_vel() < 0)
-//        {
-//
-//            if (mMissile.y >= artillery_enemy.getTop() &&
-//                    mMissile.y <= artillery_enemy.getBottom() ||
-//                    mMissile.x <= artillery_enemy.getRight() &&
-//                    mMissile.x >= artillery_enemy.getLeft())
-//            {
-//                gameOver(); // actually a win
-//            }
-//        }
-//        else
-//        {
-//            if (ball.y >= paddle_enemy.getTop() &&
-//                    ball.y <= paddle_enemy.getBottom() &&
-//                    ball.getRight() >= getWidth() - (paddle_space+paddle_half_width*2) &&
-//                    ball.getRight() <= getWidth() - (paddle_space))
-//            {
-//                ball.xDeflect();
-//            }
-//        }
+        else
+        {
+            if (mMissile.getY() >= artillery_enemy.getTop() &&
+                    mMissile.getY() <= artillery_enemy.getBottom() &&
+                    mMissile.getX() <= artillery_enemy.getRight() &&
+                    mMissile.getX() >= artillery_enemy.getLeft())
+            {
+                mMissile.setDeleteMissile(true);
+                gameOver();
+            }
+        }
     }
 
     public void update()
@@ -219,7 +210,11 @@ public class BattleView extends View
 
         if (IS_READY2)
         {
-            mMissile.draw(canvas);
+            if (!mMissile.getDeleteMissile())
+            {
+                mMissile.draw(canvas);
+                isStateController = true;
+            }
         }
     }
 
@@ -240,7 +235,6 @@ public class BattleView extends View
 
                 double distance = getPointDistance(first_x, first_y, last_x, last_y);
                 double radian = Math.atan2(first_y - last_y, first_x - last_x);
-                click = true;
                 setMissile(distance, radian);
                 break;
         }
@@ -257,16 +251,8 @@ public class BattleView extends View
         float x_vel = (float)Math.cos(rads) * (float)(distance * .1);
         float y_vel = (float)Math.sin(rads) * (float)(distance * .1);
 
-        if (click)
-        {
-            mMissile = new Missile(artillery_player.getRootX(), artillery_player.getRootY(), x_vel, y_vel, 0xFF000000);
-            IS_READY2 = true;
-            click = false;
-        }
-        else
-        {
-            mMissile = new Missile(artillery_enemy.getRootX(), artillery_enemy.getRootY(), x_vel, y_vel, 0xFF000000);
-        }
+        mMissile = new Missile(artillery_player.getRootX(), artillery_player.getRootY(), x_vel, y_vel, 0xFF000000);
+        IS_READY2 = true;
     }
 
     private class DrawTimer extends Handler
@@ -293,6 +279,8 @@ public class BattleView extends View
         private float x_vel;
         private float y_vel;
 
+        private boolean deleteMissile;
+
         private float radius = 50;
 
         Paint paint;
@@ -308,24 +296,29 @@ public class BattleView extends View
             paint.setColor(color);
         }
 
-        public float getLeft()
+        public float getX_vel()
         {
-            return x-radius;
+            return x_vel;
         }
 
-        public float getRight()
+        public float getY()
         {
-            return x+radius;
+            return y;
         }
 
-        public float getBottom()
+        public float getX()
         {
-            return y+radius;
+            return x;
         }
 
-        public float getTop()
+        public void setDeleteMissile(boolean _deleteMissile)
         {
-            return y-radius;
+            deleteMissile = _deleteMissile;
+        }
+
+        public boolean getDeleteMissile()
+        {
+            return deleteMissile;
         }
 
         public void draw(Canvas canvas)
